@@ -1,0 +1,84 @@
+#logo-title {
+	font-size: 1rem;
+}
+.logo-upload {
+	max-width: 800px;
+}
+#logo-preview-image {
+	max-width: 800px;
+	max-height: 200px;
+	padding: 8px;
+	margin: 8px;
+	border: 1px solid #007adf;
+}
+
+#icons {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.ui-icon-placeholder {
+	min-width: 500px;
+	height: 300px;
+	min-height: 300px;
+	background-color: #aa993a;
+}
+
+.preview {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.icon-preview {
+	max-width: 100px;
+	max-height: 100px;
+	padding: 8px;
+}
+
+.icon-form {
+	padding: 8px;
+	margin-right: 8px;
+	margin-bottom: 8px;
+	border: 1px solid #007adf;
+	width: 500px;
+	min-height: 270px;
+}
+
+.link-buttons {
+	margin-left: 8px;
+}
+
+.link-form {
+	display: flex;
+	flex-direction: column;
+}
+
+.small-text {
+	font-size: 0.8rem;
+}
+
+.smaller-text {
+	font-size: 0.7rem;
+	padding: .325rem;
+}
+
+#footer-links {
+	display: none;
+	flex-direction: column;
+	
+	border: 1px solid #007adf;
+	max-width: 1000px;
+}
+
+.footer-link {
+	display: flex;
+	flex-direction: column;
+	
+	margin: 12px;
+}
+
+.json-upload {
+	max-width: 500px;
+}
