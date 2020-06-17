@@ -1,102 +1,60 @@
-// FOOTER LINKS
+// video LINKS
 // add link
-$("body").on('click', 'button.new-footer-link', function(i, e) {
-	VideoLibraryModule.newVideo(this)
+$("body").on('click', 'button.new-video-link', function(i, e) {
+	VideoLibraryModule.newVideo(this);
+})
+$("body").on('click', 'button.new-video-tag', function(i, e) {
+	VideoLibraryModule.newVideoTag(this);
+})
+$("body").on('click', 'button.remove-video-tag', function(i, e) {
+	var btnParent = $(this).parent();
+	if($(this).parent().parent().children().length <= 2) {
+		$(this).parent().parent().children().find('button.remove-video-tag').remove();
+	}
+	btnParent.remove();
+	
 })
 
 // delete link
-$("body").on('click', 'button.delete-footer-link', function(i, e) {
+$("body").on('click', 'button.delete-video-link', function(i, e) {
 	VideoLibraryModule.deleteVideo(this)
+	if($('#video-links tbody').children().length <= 0) {
+		$('.new-video-link.main-add-button').show();
+	}
 })
 
 // SAVE CHANGES
 $("body").on('click', '#save_changes', function(i, e) {
 	// SETTINGS holds everything except icon files that were attached by user
-	// FORM_DATA holds all icon image files that were attached by user
 	// form_data.settings will hold the encoded json string containing settings values
-	
-	//
-	var files_attached = 0
-	//
 	
 	var form_data = new FormData()
 	
 	var settings = {}
-	settings.form_name = VideoLibraryModule.formName
-	if ($("#dashboard_title").val())
-		settings.dashboard_title = $("#dashboard_title").val()
-	
-	// logo/image for dashboard
-	var logoInput = $('.logo-upload .custom-file-input')
-	if (logoInput.prop('files') && logoInput.prop('files')[0]) {
-		form_data.append('dashboard-logo', logoInput.prop('files')[0])
-	} else {
-		if ($('.logo-preview').attr('data-edoc-id')) {
-			settings['dashboard-logo'] = VideoLibraryModule.settings['dashboard-logo']
+	// add video link data to settings
+	$(".video-link").each(function(i, link) {
+		var url = $(link).find('.video_url').val();
+		var title = $(link).find('.video_title').val();
+		var description = $(link).find('.video_description').val();
+		if (!settings.video_links) {
+			settings.video_links = [];
 		}
-	}
+		settings.video_links.push({});
+		settings.video_links[settings.video_links.length-1].url = (url ? url : '');
+		settings.video_links[settings.video_links.length-1].title = (title ? title : '');
+		settings.video_links[settings.video_links.length-1].description = (description ? description : '');
+		$(link).find('.video_tags').each(function(ix, tag) {
+			var tagVal = $(tag).val();
+			if (!settings.video_links[settings.video_links.length-1].tags) {
+				settings.video_links[settings.video_links.length-1].tags = [];
+			}
+			if(tagVal) {
+				settings.video_links[settings.video_links.length-1].tags.push(tagVal);
+			}
+		});
+	});
 	
-	// add icons and links
-	settings.icons = []
-	$("#icons .icon-form").each(function(j, iconForm) {
-		settings.icons.push({})
-		var icon = settings.icons[settings.icons.length-1]
-		
-		// attach new icon file to form_data OR put edoc_id in settings
-		var input = $(iconForm).find('.custom-file-input')
-		var file_attached = false
-		if (input && input.prop('files') && input.prop('files')[0]) {
-			file_attached = true
-			form_data.append('icon-' + (settings.icons.length-1), input.prop('files')[0])
-		} else if ($(iconForm).attr('data-icon-edoc-id')) {
-			icon.edoc_id = $(iconForm).attr('data-icon-edoc-id')
-		}
-		
-		// add icon label
-		if ($(iconForm).find('.icon-label').val())
-			icon.label = $(iconForm).find('.icon-label').val()
-		
-		// add links
-		icon.links = []
-		$(iconForm).find('.link-form').each(function(k, linkForm) {
-			icon.links.push({})
-			var link = icon.links[icon.links.length-1]
-			
-			// label
-			if ($(linkForm).find('.link-label').val())
-				link.label = $(linkForm).find('.link-label').val()
-			// url
-			if ($(linkForm).find('.link-url').val())
-				link.url = $(linkForm).find('.link-url').val()
-			
-			if ($.isEmptyObject(link))
-				icon.links.pop()
-		})
-		if (icon.links.length == 0) 
-			delete icon.links
-		
-		if (!file_attached && !icon.label && !icon.edoc_id && $.isEmptyObject(icon))
-			settings.icons.pop()		// effectively ignore this icon
-	})
-	if (settings.icons.length == 0)
-		delete settings.icons
-	
-	// add footer link data to settings
-	$(".footer-link").each(function(i, link) {
-		var label = $(link).find('.link-label').val()
-		var url = $(link).find('.link-url').val()
-		if (url || label) {
-			if (!settings.footer_links)
-				settings.footer_links = []
-			settings.footer_links.push({})
-			if (url)
-				settings.footer_links[settings.footer_links.length-1].url = url
-			if (label)
-				settings.footer_links[settings.footer_links.length-1].label = label
-		}
-	})
-	
-	form_data.append('settings', JSON.stringify(settings))
+	form_data.append('video_data', JSON.stringify(settings))
 	
 	$.ajax({
 		url: VideoLibraryModule.saveConfigUrl,
@@ -119,40 +77,65 @@ $("body").on('click', '#save_changes', function(i, e) {
 })
 
 // VideoLibraryModule icon/link functions
-VideoLibraryModule.newVideo = function() {
-	$("#footer-links").css('display', 'flex')
-	$('#footer-links').append("\
-					<div class='footer-link mt-2'>\
-						<div class='ml-2 row'>\
-							<span class='mt-1'></span>\
-							<button type='button' class='btn btn-outline-secondary smaller-text delete-footer-link ml-3'><i class='fas fa-trash-alt'></i></i> Delete Link</button>\
+VideoLibraryModule.newVideo = function(element) {
+	$("#video-links").css('display', 'table')
+
+	var newRow = "\
+				<tr class='video-link' data-video-number=''>\
+					<td>\
+						<input class='video_url' type='text'/>\
+					</td>\
+					<td>\
+						<input class='video_title' type='text'/>\
+					</td>\
+					<td>\
+						<textarea class='video_description'></textarea>\
+					</td>\
+					<td>\
+						<div>\
+							<input class='video_tags' style='min-width: 100px;' type='text'/>\
+							<button type='button' class='btn btn-outline-secondary smaller-text new-video-tag'><i class='fas fa-plus'></i></button>\
 						</div>\
-						<label class='ml-2'>Label</label>\
-						<input class='link-label ml-2' type='text'/>\
-						<label class='ml-2'>URL</label>\
-						<input class='link-url ml-2' type='text'/>\
-					</div>")
+					</td>\
+					<td class=''>\
+						<button type='button' class='btn btn-outline-secondary smaller-text delete-video-link ml-3'><i class='fas fa-trash-alt'></i></i> Remove</button>\
+						<button type='button' class='btn btn-outline-secondary smaller-text new-video-link'><i class='fas fa-plus'></i> Add</button>\
+					</td>\
+				</tr>";
+	if(element === undefined || $(element).hasClass('main-add-button')) {
+		$('#video-links tbody').append(newRow);
+		$('.new-video-link.main-add-button').hide();
+	} else {
+		$(element).parent().parent().after(newRow);
+	}
 	VideoLibraryModule.renumberLinks()
 }
+VideoLibraryModule.newVideoTag = function(element) {
+
+	$("#video-links").css('display', 'table');
+	$(element).parent().after("\
+						<div>\
+							<input class='video_tags' style='min-width: 100px;' type='text'/>\
+							<button type='button' class='btn btn-outline-secondary smaller-text remove-video-tag'><i class='fas fa-minus'></i></button>\
+							<button type='button' class='btn btn-outline-secondary smaller-text new-video-tag'><i class='fas fa-plus'></i></button>\
+						</div>\
+						");
+	if($(element).parent().parent().children().length == 2) {
+		$(element).parent().parent().children(':first-child').find('button.remove-video-tag').remove();
+		$(element).parent().parent().children(':first-child').find('input').after(" <button type='button' class='btn btn-outline-secondary smaller-text remove-video-tag'><i class='fas fa-minus'></i></button>");
+	}
+	// VideoLibraryModule.renumberTags()
+}
 VideoLibraryModule.deleteVideo = function(link) {
-	$(link).closest('.footer-link').remove()
-	if ($("#footer-links").children().length == 0) {
-		$("#footer-links").css('display', 'none')
+	$(link).closest('.video-link').remove()
+	if ($("#video-links").children().length == 0) {
+		$("#video-links").css('display', 'none')
 	}
 	VideoLibraryModule.renumberLinks()
 }
 VideoLibraryModule.renumberLinks = function() {
-	$(".icon-form").each(function(i, iconForm) {
-		$(iconForm).find(".link-form").each(function(j, linkForm) {
-			$(linkForm).find('span').html("Link " + (j+1))
-			$(linkForm).find('label:first').attr('for', "link-label-" + i + "-" + j)
-			$(linkForm).find('input:first').attr('id', "link-label-" + i + "-" + j)
-			$(linkForm).find('label:last').attr('for', "link-url-" + i + "-" + j)
-			$(linkForm).find('input:last').attr('id', "link-url-" + i + "-" + j)
-		})
-	})
-	$(".footer-link").each(function(i, link) {
-		$(link).find('span').html("Link " + (i+1))
+	$(".video-link").each(function(i, link) {
+		$(link).attr('data-video-number', i);
 	})
 }
 

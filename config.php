@@ -1,5 +1,42 @@
 <?php
 
+/*
+Video Data Module Settings setup:
+{
+	"key": "video_data",
+	"name": "Video",
+	"repeatable": true,
+	"branchingLogic": {
+		"field": "client_or_server",
+		"value": "2"
+	},
+	"type": "sub_settings",
+	"sub_settings": [
+		{
+			"key": "video_url",
+			"name": "YouTube / Vimeo video URL",
+			"type": "text"
+		},
+		{
+			"key": "video_title",
+			"name": "Title",
+			"type": "text"
+		},
+		{
+			"key": "video_description",
+			"name": "Description",
+			"type": "textarea"
+		},
+		{
+			"key": "video_tags",
+			"name": "Tag(s)",
+			"type": "text",
+			"repeatable": true
+		}
+	]
+}
+*/
+
 if (!empty($_POST)) {
 	$data = json_decode($_POST['data'], true);
 	$data['action'] = filter_var($data['action'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
@@ -9,25 +46,38 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
 $project = new \Project($module->framework->getProjectId());
+
+$projModSettings = $module->framework->getProjectSettings();
+
+$client_or_server = $module->framework->getProjectSetting('client_or_server');
 ?>
 	<div>
 		<div id='form_assocs'>
-		<h5 class="mt-3">Alternate Video Library URL</h5>
-		<input type="text" style="width: 400px" class="form-control" id="video_library_url" aria-describedby="video_library_url"></input>
-
-		<h5 class='mt-3'>Footer Links</h5>
-		<button type='button' class='btn btn-outline-secondary small-text new-footer-link'><i class="fas fa-plus"></i> New Footer Link</button>
-		<div id='footer-links' class='mt-3'>
-		</div>
-		
-		<br>
-		<button id='save_changes' class='btn btn-outline-primary mt-3' type='button'>Save Changes</button>
-		<div id='json-buttons' class='d-flex my-3'>
-			<button class='btn btn-outline-secondary' onclick='VideoLibraryModule.downloadJSON("patient_access_module_settings_" + new Date().getTime(), JSON.stringify(VideoLibraryModule.settings))'>Settings Export</button>
-			<div class='json-upload custom-file ml-3'>
-				<input type='file' class='custom-file-input' id='json-import' aria-describedby='upload'>
-				<label class='custom-file-label text-truncate' for='json-import'>Settings Import</label>
-			</div>
+		<h5 class="mt-3">Video Library URL</h5>
+		<p><?php echo $module->framework->getUrl('get-videos.php', true, true); ?></p>
+		<h5 class='mt-3'>Videos</h5>
+		<?php if($client_or_server == 1): ?>
+			<p>This module is currently setup to use an alternate URL source for managing the Video Library. To manage the library here please go to External Modules on the left hand navigation, click "Configure" next to the Video Library Module and turn off "Alternate Video Library URL."</p>
+		<?php endif; ?>
+		<div style="<?php echo ($client_or_server == 1 ? 'display: none;' : '' ); ?>">
+			<table id='video-links' class='mt-3'>
+				<thead>
+					<tr>
+						<th>URL</th>
+						<th>Title</th>
+						<th>Description</th>
+						<th>Tags</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+				
+				</tbody>
+			</table>
+			<button type='button' class='btn btn-outline-secondary small-text new-video-link main-add-button'><i class="fas fa-plus"></i> New Video</button>
+			
+			<br>
+			<button id='save_changes' class='btn btn-outline-primary mt-3' type='button'>Save Changes</button>
 		</div>
 		<link rel="stylesheet" href="<?=$module->getUrl('css/config.css')?>"/>
 		<?php
@@ -36,7 +86,6 @@ $project = new \Project($module->framework->getProjectId());
 			$videos = $module->framework->getProjectSetting('video_data');
 			$settings = $module->framework->getProjectSettings();
 			$videoSettings = $module->framework->getSubSettings('video_data');
-			highlight_string("<?php\n\$videoSettings =\n" . var_export($videoSettings, true) . ";\n?>");
 			if (!empty($clientOrServer)){
 				/*$clientOrServer = json_decode($clientOrServer, true);
 				$videoLibraryURL = json_decode($videoLibraryURL, true);
@@ -58,19 +107,26 @@ $project = new \Project($module->framework->getProjectId());
 		VideoLibraryModule.clientOrServer = <?=json_encode($clientOrServer)?>;
 		VideoLibraryModule.videoLibraryURL = <?=json_encode($videoLibraryURL)?>;
 		VideoLibraryModule.videoSettings = <?=json_encode($videoSettings)?>;
-		if (VideoLibraryModule.videoLibraryURL) {
-			$("#video_library_url").val(VideoLibraryModule.htmlDecode(VideoLibraryModule.videoLibraryURL))
-		}
-		
-		for (var i in VideoLibraryModule.videoSettings) {
-			var video = VideoLibraryModule.videoSettings[i]
-			console.log(video);
-			VideoLibraryModule.newVideo()
-			var videoElement = $("#footer-links").find('.footer-link:last')
-			
-			// link label and url
-			$(videoElement).find('.link-label').val(video.video_title)
-			$(videoElement).find('.link-url').val(video.video_url)
+		if(VideoLibraryModule.videoSettings.length <=0) {
+			VideoLibraryModule.newVideo();
+		} else {
+			for (var i in VideoLibraryModule.videoSettings) {
+				var video = VideoLibraryModule.videoSettings[i];
+				VideoLibraryModule.newVideo();
+				var videoElement = $("#video-links").find('.video-link:last');
+				
+				// link label and url
+				$(videoElement).find('.video_url').val(video.video_url);
+				$(videoElement).find('.video_title').val(video.video_title);
+				$(videoElement).find('.video_description').val(video.video_description);
+
+				for (var ix in video.video_tags) {
+					if($(videoElement).find('.video_tags').last().val() != '') {
+						VideoLibraryModule.newVideoTag($(videoElement).find('.video_tags').last().siblings('.new-video-tag'));
+					}
+					$(videoElement).find('.video_tags').last().val(video.video_tags[ix]);
+				}
+			}
 		}
 	</script>
 <?php

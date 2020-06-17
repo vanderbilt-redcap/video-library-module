@@ -13,7 +13,7 @@
         }
 	],
 	
-	"framework-version": 4,
+	"framework-version": 5,
 	
 	"permissions": [
 		"redcap_every_page_top"
@@ -26,11 +26,6 @@
 	"links": {
 		"project": [
 			{
-				"name": "Get Videos",
-				"icon": "user_list",
-				"url": "get-videos.php?NOAUTH"
-			},
-			{
 				"name": "Video Library Configuration",
 				"icon": "gear",
 				"url": "config.php"
@@ -39,22 +34,6 @@
 	},
 
 	"project-settings": [
-		{
-			"key": "suggested_videos_on",
-			"name": "Show suggested videos at end of video?",
-			"type": "radio",
-			"choices": [
-				{
-					"value": 0,
-					"name": "No"
-				},
-				{
-					"value": 1,
-					"name": "Yes"
-				}
-			],
-			"default": 0
-		},
 		{
 			"key": "client_or_server",
 			"name":"Use alternate URL for library source?",
@@ -85,7 +64,7 @@
 			"repeatable": true,
 			"branchingLogic": {
 				"field": "client_or_server",
-				"value": "2"
+				"value": "3"
 			},
 			"type": "sub_settings",
 			"sub_settings": [
