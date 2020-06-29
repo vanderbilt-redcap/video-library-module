@@ -23,7 +23,7 @@ class VideoLibraryModule extends AbstractExternalModule
 	}
 
 	function redcap_data_entry_form_top() {
-		// $this->initVideoEmbeds();
+		$this->initVideoEmbeds();
 	}
 
 	function redcap_survey_page_top() {
