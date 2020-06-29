@@ -54,8 +54,10 @@ $client_or_server = $module->framework->getProjectSetting('client_or_server');
 	<div>
 		<div id='form_assocs'>
 		<h5 class="mt-3">Video Library URL</h5>
-		<p><?php echo $module->framework->getUrl('get-videos.php', true, true); ?></p>
+		<p>To share this video library with other REDCap users or across projects, use the following link: <br><em><?php echo $module->framework->getUrl('get-videos.php', true, true); ?></em></p>
+		<p>&nbsp;</p>
 		<h5 class='mt-3'>Videos</h5>
+		<p>Include videos from either YouTube or Vimeo below to add to this video library. Tags and video descriptions are searchable in descriptive text fields within the online designer. Please note that you should obtain permission for videos included as a part of your project.</p>
 		<?php if($client_or_server == 1): ?>
 			<p>This module is currently setup to use an alternate URL source for managing the Video Library. To manage the library here please go to External Modules on the left hand navigation, click "Configure" next to the Video Library Module and turn off "Alternate Video Library URL."</p>
 		<?php endif; ?>
