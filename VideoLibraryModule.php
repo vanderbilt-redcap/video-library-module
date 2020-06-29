@@ -7,7 +7,6 @@ use ExternalModules\ExternalModules;
 class VideoLibraryModule extends AbstractExternalModule
 {
 	function redcap_every_page_top($project_id) {
-		
 		if(strpos($_SERVER['REQUEST_URI'], 'online_designer.php') !== false && isset($_GET['page'])){
 			//echo '<link rel="stylesheet" type="text/css" href="' .  $this->getUrl('css/videoLibrary.css') . '">';
 			?>
@@ -21,6 +20,28 @@ class VideoLibraryModule extends AbstractExternalModule
 				</script>
 			<?php 
 		}
+	}
+
+	function redcap_data_entry_form_top() {
+		// $this->initVideoEmbeds();
+	}
+
+	function redcap_survey_page_top() {
+		$this->initVideoEmbeds();
+	}
+
+	function initVideoEmbeds() {
+		$this->initializeJavascriptModuleObject();
+		?>
+			<script src="https://www.youtube.com/iframe_api"></script>
+			<script src="https://player.vimeo.com/api/player.js"></script>
+			<script src="<?=$this->getUrl('js/video_embeds.js')?>"></script>
+			<script>
+				var hideEndVideosYouTube = <?php echo (is_numeric($this->getProjectSetting('hide_youtube')) ? $this->getProjectSetting('hide_youtube') : 0 ); ?>;
+				var hideEndVideosVimeo = <?php echo (is_numeric($this->getProjectSetting('hide_vimeo')) ? $this->getProjectSetting('hide_vimeo') : 0 ); ?>;
+			</script>
+			<link rel="stylesheet" href="<?=$this->getUrl('css/video_embed.css')?>">
+		<?php
 	}
 
 	function loadSharedClientLibraries(){

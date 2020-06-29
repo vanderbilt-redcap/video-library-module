@@ -16,7 +16,9 @@
 	"framework-version": 5,
 	
 	"permissions": [
-		"redcap_every_page_top"
+		"redcap_every_page_top",
+		"redcap_survey_page_top",
+		"redcap_data_entry_form_top"
 	],
 
 	"no-auth-pages":[
@@ -57,6 +59,36 @@
 				"field": "client_or_server",
 				"value": "1"
 			}
+		},
+		{
+			"key": "hide_youtube",
+			"name":"Hide video player when YouTube videos are stopped",
+			"type": "radio",
+			"choices": [
+				{
+					"value": 1,
+					"name": "Yes"
+				},
+				{
+					"value": 2,
+					"name": "No"
+				}
+			]
+		},
+		{
+			"key": "hide_vimeo",
+			"name":"Hide relate player when Vimeo videos are stopped",
+			"type": "radio",
+			"choices": [
+				{
+					"value": 1,
+					"name": "Yes"
+				},
+				{
+					"value": 2,
+					"name": "No"
+				}
+			]
 		},
 		{
 			"key": "video_data",
