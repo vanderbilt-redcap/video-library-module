@@ -80,7 +80,7 @@ $("body").on('click', '#save_changes', function(i, e) {
 VideoLibraryModule.newVideo = function(element) {
 	$("#video-links").css('display', 'table')
 
-	var newRow = "\
+	var newRow = $("\
 				<tr class='video-link' data-video-number=''>\
 					<td>\
 						<input class='video_url' type='text'/>\
@@ -101,13 +101,24 @@ VideoLibraryModule.newVideo = function(element) {
 						<button type='button' class='btn btn-outline-secondary smaller-text delete-video-link ml-3'><i class='fas fa-trash-alt'></i></i> Remove</button>\
 						<button type='button' class='btn btn-outline-secondary smaller-text new-video-link'><i class='fas fa-plus'></i> Add</button>\
 					</td>\
-				</tr>";
+				</tr>");
 	if(element === undefined || $(element).hasClass('main-add-button')) {
 		$('#video-links tbody').append(newRow);
 		$('.new-video-link.main-add-button').hide();
 	} else {
 		$(element).parent().parent().after(newRow);
 	}
+	newRow.find('.video_url').blur(function(){
+		var urlVal = $(this).val();
+		var currentTitle = $(newRow).find('.video_title').val();
+		if(urlVal.length > 0 && (urlVal.includes("youtube") || urlVal.includes("vimeo")) && currentTitle.length == 0) {
+			$.getJSON('https://noembed.com/embed', {format: 'json', url: urlVal}, function (data) {
+				if(data.title.length > 0) {
+					$(newRow).find('.video_title').val(data.title);
+				}
+			});
+		}
+	});
 	VideoLibraryModule.renumberLinks()
 }
 VideoLibraryModule.newVideoTag = function(element) {
