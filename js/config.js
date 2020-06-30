@@ -1,3 +1,14 @@
+var dataChanged = false;
+function changeDataTrigger() {
+	dataChanged = true;
+	window.onbeforeunload = function() {
+		return 'You have unsaved changes! Are sure you want to navigate away from this page?';
+	};
+}
+function clearChangeDataTrigger() {
+	dataChanged = false;
+	window.onbeforeunload = null;
+}
 // video LINKS
 // add link
 $("body").on('click', 'button.new-video-link', function(i, e) {
@@ -12,7 +23,7 @@ $("body").on('click', 'button.remove-video-tag', function(i, e) {
 		$(this).parent().parent().children().find('button.remove-video-tag').remove();
 	}
 	btnParent.remove();
-	
+	changeDataTrigger();
 })
 
 // delete link
@@ -65,6 +76,7 @@ $("body").on('click', '#save_changes', function(i, e) {
 		data: form_data,
 		type: 'POST',
 		success: function(response){
+			clearChangeDataTrigger();
 			simpleDialog(response.message)
 			if (response.new_settings) {
 				VideoLibraryModule.settings = JSON.parse(response.new_settings)
@@ -83,7 +95,8 @@ VideoLibraryModule.newVideo = function(element) {
 	var newRow = $("\
 				<tr class='video-link' data-video-number=''>\
 					<td>\
-						<input class='video_url' type='text'/>\
+						<input class='video_url' type='text'/><br><br>\
+						<button type='button' class='btn btn-outline-secondary smaller-text new-video-link'><i class='fas fa-plus'></i> Add</button>\
 					</td>\
 					<td>\
 						<input class='video_title' type='text'/>\
@@ -108,6 +121,18 @@ VideoLibraryModule.newVideo = function(element) {
 	} else {
 		$(element).parent().parent().after(newRow);
 	}
+	newRow.find('.video_url').change(function(){
+		changeDataTrigger();
+	});
+	newRow.find('.video_title').change(function(){
+		changeDataTrigger();
+	});
+	newRow.find('.video_description').change(function(){
+		changeDataTrigger();
+	});
+	newRow.find('.video_tags').change(function(){
+		changeDataTrigger();
+	});
 	newRow.find('.video_url').blur(function(){
 		var urlVal = $(this).val();
 		var currentTitle = $(newRow).find('.video_title').val();
@@ -124,21 +149,25 @@ VideoLibraryModule.newVideo = function(element) {
 VideoLibraryModule.newVideoTag = function(element) {
 
 	$("#video-links").css('display', 'table');
-	$(element).parent().after("\
-						<div>\
-							<input class='video_tags' style='min-width: 100px;' type='text'/>\
-							<button type='button' class='btn btn-outline-secondary smaller-text remove-video-tag'><i class='fas fa-minus'></i></button>\
-							<button type='button' class='btn btn-outline-secondary smaller-text new-video-tag'><i class='fas fa-plus'></i></button>\
-						</div>\
-						");
+	var newTagElement = $("<div>\
+								<input class='video_tags' style='min-width: 100px;' type='text'/>\
+								<button type='button' class='btn btn-outline-secondary smaller-text remove-video-tag'><i class='fas fa-minus'></i></button>\
+								<button type='button' class='btn btn-outline-secondary smaller-text new-video-tag'><i class='fas fa-plus'></i></button>\
+							</div>");
+	$(element).parent().after(newTagElement);
 	if($(element).parent().parent().children().length == 2) {
 		$(element).parent().parent().children(':first-child').find('button.remove-video-tag').remove();
 		$(element).parent().parent().children(':first-child').find('input').after(" <button type='button' class='btn btn-outline-secondary smaller-text remove-video-tag'><i class='fas fa-minus'></i></button>");
 	}
+
+	newTagElement.find('.video_tags').change(function(){
+		changeDataTrigger();
+	});
 	// VideoLibraryModule.renumberTags()
 }
 VideoLibraryModule.deleteVideo = function(link) {
-	$(link).closest('.video-link').remove()
+	$(link).closest('.video-link').remove();
+	changeDataTrigger();
 	if ($("#video-links").children().length == 0) {
 		$("#video-links").css('display', 'none')
 	}

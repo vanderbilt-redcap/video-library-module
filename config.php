@@ -129,6 +129,7 @@ $client_or_server = $module->framework->getProjectSetting('client_or_server');
 					$(videoElement).find('.video_tags').last().val(video.video_tags[ix]);
 				}
 			}
+			clearChangeDataTrigger();
 		}
 	</script>
 <?php
